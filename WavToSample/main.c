@@ -1,12 +1,5 @@
 #include <Windows.h>
 #include <stdio.h>
-#include <inttypes.h>
-
-typedef struct File_t
-{
-    BYTE* data;
-    SIZE_T size;
-} File;
 
 BYTE* LoadFile(const char* path)
 {
@@ -146,7 +139,7 @@ void PrintWav(Wav_t* wav)
 {
     DWORD sampleCount = wav->data.SubChunk2Size / wav->fmt.BlockAlign;
 
-    printf("unsigned char sample[] = {\n   ");
+    printf("const unsigned char sample8000[] = {\n   ");
 
     for (size_t i = 0; i < sampleCount; i++)
     {
