@@ -93,53 +93,51 @@ typedef struct Wav_t
     char buff[0];
 }Wav_t;
 
-BOOL IsValidWav(Wav_t* wav)
+WORD IsValidWavError(Wav_t* wav)
 {
     Riff_t* rif = &wav->riff;
     Fmt_t* fmt = &wav->fmt;
     Data_t* data = &wav->data;
 
     if (memcmp(rif->ChunkID, "RIFF", sizeof(rif->ChunkID)))
-        return FALSE;
+        return 1;
 
     if (memcmp(rif->Format, "WAVE", sizeof(rif->Format)))
-        return FALSE;
+        return 2;
 
     if (memcmp(fmt->SubChunk1ID, "fmt", sizeof(fmt->SubChunk1ID)))
-        return FALSE;
+        return 3;
 
     if (memcmp(data->SubChunk2ID, "data", sizeof(data->SubChunk2ID)))
-        return FALSE;
+        return 4;
 
     //if (rif->ChunkSize != 4 + (8 + fmt->SubChunk1Size) + (8 + data->SubChunk2Size))
-    //    return FALSE;
+    //    return 5;
     
     if (fmt->ByteRate != fmt->SampleRate * fmt->NumChannels * fmt->BitsPerSample / 8)
-        return FALSE;
+        return 6;
     
     if (fmt->AudioFormat != 1) // PCM
-        return FALSE;
+        return 7;
 
     if (fmt->NumChannels != 1)
-        return FALSE;
+        return 8;
     
     if (fmt->BitsPerSample != 8)
-        return FALSE;
-    
-    if (fmt->SampleRate != 8000)
-        return FALSE;
+        return 9;
 
     if (fmt->BitsPerSample / 8 != wav->fmt.BlockAlign)
-        return FALSE;
+        return 10;
 
-    return TRUE;
+    return 0;
 }
 
 void PrintWav(Wav_t* wav)
 {
     DWORD sampleCount = wav->data.SubChunk2Size / wav->fmt.BlockAlign;
 
-    printf("const unsigned char sample8000[] = {\n   ");
+    printf("#define SAMPLE_RATE %d\n", wav->fmt.SampleRate);
+    printf("PROGMEM const unsigned char sample[] = {\n   ");
 
     for (size_t i = 0; i < sampleCount; i++)
     {
@@ -167,9 +165,11 @@ int main(int argc, char** argv)
         return EXIT_FAILURE;
     }
 
-    if (!IsValidWav((Wav_t*)file))
+    auto errorCode = IsValidWavError((Wav_t*)file);
+    if (errorCode)
     {
-        printf("Please enter a valid .wav file with mono 8bit pcm at 8000hz\n");
+        printf("Please enter a valid .wav file with mono 8bit pcm\n");
+        printf("Error code: %d\n", errorCode);
         return EXIT_FAILURE;
     }
 

@@ -3,5 +3,5 @@
     <Platform Name="x64" />
     <Platform Name="x86" />
   </Configurations>
-  <Project Path="WavToSample/WavToSample.vcxproj" />
+  <Project Path="WavToSample/WavToSample.vcxproj" Id="f6b429af-4eb2-40f3-8293-a9855acb80e4" />
 </Solution>
